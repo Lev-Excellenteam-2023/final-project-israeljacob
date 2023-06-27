@@ -1,7 +1,7 @@
 import openai
 import asyncio
 
-openai.api_key_path = 'API_KEY.txt'
+openai.api_key_path = '../API_KEY.txt'
 
 prompt = "I have missed the lecture in college and I have just the text from the pptx file of the lecture. can you " \
          "explain me the text? here is the text:"
