@@ -10,6 +10,17 @@ OUTPUTS_FOLDER = 'C:\\users\\yisra\\desktop\\outputs'
 
 
 def treat_file(file):
+    """
+    Processes a PowerPoint file by extracting text, making OpenAI API calls, and writing the results to a JSON file.
+
+    Args:
+        file (str): Path of the PowerPoint file to be processed.
+
+    Returns:
+        None
+
+    """
+
     pptx_text_dict = extract_text_from_pptx(file)
     openai_returned_dict = asyncio.run(call_openai_api_helper(pptx_text_dict))
     file_name = os.path.basename(file)
@@ -18,6 +29,14 @@ def treat_file(file):
 
 
 def run_explainer():
+    """
+    Runs the explainer application by continuously monitoring the uploads folder and processing new PowerPoint files.
+
+    Returns:
+        None
+
+    """
+
     files_was_treated = []
     os.makedirs(OUTPUTS_FOLDER, exist_ok=True)
     try:
