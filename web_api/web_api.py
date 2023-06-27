@@ -7,7 +7,7 @@ import json
 from flask import Flask, request, jsonify
 
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = 'uploads'
+app.config['UPLOAD_FOLDER'] = 'C:\\users\\yisra\\desktop\\uploads'
 
 
 def get_file_details(filename: str)-> tuple:
@@ -65,7 +65,7 @@ def status(uid: str) -> jsonify:
         jsonify: A JSON response containing the status, original filename, timestamp,
         and explanation (if available) of the file.
     """
-    files = os.listdir(app.config['UPLOAD_FOLDER'])
+    files = os.listdir('C:\\users\\yisra\\desktop\\outputs')
     matching_files = [file for file in files if uid in file]
     if len(matching_files) == 0:
         return jsonify({
@@ -75,7 +75,7 @@ def status(uid: str) -> jsonify:
             'explanation': None
         }), 404
 
-    file_path = os.path.join('outputs', matching_files[0])
+    file_path = os.path.join('../outputs', matching_files[0])
     original_filename, timestamp, _ = get_file_details(matching_files[0])
 
     if os.path.isfile(file_path):
