@@ -28,7 +28,7 @@ def get_file_details(filename: str)-> tuple:
     return original_filename, timestamp, uid
 
 
-@app.route('/', methods=['POST'])
+@app.route('/upload', methods=['POST'])
 def upload() -> jsonify:
     """
     Handle file upload.
@@ -51,7 +51,7 @@ def upload() -> jsonify:
     return jsonify({'error': 'No file uploaded.'})
 
 
-@app.route('/<uid>', methods=['GET'])
+@app.route('/status/<uid>', methods=['GET'])
 def status(uid: str) -> jsonify:
     """
     Retrieve file status and explanation.
