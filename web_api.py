@@ -44,7 +44,7 @@ def upload():
 
 @app.route('/<uid>', methods=['GET'])
 def status(uid):
-    files = os.listdir(app.config['UPLOAD_FOLDER'])
+    files = os.listdir('outputs')
     matching_files = [file for file in files if uid in file]
     if len(matching_files) == 0:
         return jsonify({
@@ -54,7 +54,7 @@ def status(uid):
             'explanation': None
         }), 404
 
-    file_path = os.path.join(app.config['UPLOAD_FOLDER'], matching_files[0])
+    file_path = os.path.join('outputs', matching_files[0])
     original_filename, timestamp, _ = get_file_details(matching_files[0])
 
     if os.path.isfile(file_path):
