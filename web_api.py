@@ -10,7 +10,16 @@ app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'uploads'
 
 
-def get_file_details(filename):
+def get_file_details(filename: str)-> tuple:
+    """
+    Extracts details from a filename.
+
+    Args:
+        filename (str): The filename to extract details from.
+
+    Returns:
+        tuple: A tuple containing the original filename, timestamp, and UID.
+    """
     filename = os.path.basename(filename)
     parts = filename.split('_')
     original_filename = '_'.join(parts[:-2])
@@ -20,7 +29,7 @@ def get_file_details(filename):
 
 
 @app.route('/', methods=['POST'])
-def upload():
+def upload() -> jsonify:
     """
     Handle file upload.
 
@@ -43,8 +52,20 @@ def upload():
 
 
 @app.route('/<uid>', methods=['GET'])
-def status(uid):
-    files = os.listdir('outputs')
+def status(uid: str) -> jsonify:
+    """
+    Retrieve file status and explanation.
+
+    This route retrieves the status and explanation of a file with the given UID.
+
+    Args:
+        uid (str): The unique identifier (UID) of the file.
+
+    Returns:
+        jsonify: A JSON response containing the status, original filename, timestamp,
+        and explanation (if available) of the file.
+    """
+    files = os.listdir(app.config['UPLOAD_FOLDER'])
     matching_files = [file for file in files if uid in file]
     if len(matching_files) == 0:
         return jsonify({
