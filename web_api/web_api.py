@@ -67,7 +67,7 @@ def status(uid: str) -> jsonify:
         and explanation (if available) of the file.
     """
     files = os.listdir('C:\\users\\yisra\\desktop\\uploads')
-    matching_files = [file for file in files if uid in file]
+    matching_files = [file for file in files if uid + ".pptx" == file.split("_")[2]]
     if len(matching_files) == 0:
         return jsonify({
             'status': 'not found',
