@@ -4,7 +4,7 @@ import asyncio
 openai.api_key_path = '../API_KEY.txt'
 
 prompt = "I have missed the lecture in college and I have just the text from the pptx file of the lecture. can you " \
-         "explain me the text? here is the text:"
+         "explain me the text? here is the text:   "
 
 
 async def call_openai_api(value: str) -> str:
@@ -17,7 +17,7 @@ async def call_openai_api(value: str) -> str:
        Returns:
            str: The generated explanation.
        """
-    response = await openai.Completion.acreate(engine='text-davinci-003', prompt=prompt + value, max_tokens=1000)
+    response = await openai.Completion.acreate(engine='text-davinci-003', prompt= prompt + value, max_tokens=1000)
     return "".join(choice.text.strip() for choice in response.choices)
 
 

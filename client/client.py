@@ -47,7 +47,7 @@ def get_status(base_url, uid):
     json_data = response.json()
     status = json_data['status']
     filename = json_data['filename']
-    timestamp = datetime.fromisoformat(json_data['timestamp'])
+    timestamp = json_data['timestamp']
     explanation = json_data['explanation']
     return {
         'status': status,

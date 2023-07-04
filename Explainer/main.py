@@ -45,6 +45,7 @@ def run_explainer():
                                      if file.endswith(".pptx") and file not in files_was_treated]
             for file in files_for_taking_care:
                 print(f"Starting to treat file {file} \n")
+                file = os.path.join(UPLOADS_FOLDER,file)
                 treat_file(file)
                 print(f"Finished treating file {file} \n")
             files_was_treated += files_for_taking_care

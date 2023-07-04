@@ -45,7 +45,8 @@ def upload() -> jsonify:
         uid = str(uuid.uuid4())
         original_filename = file.filename
         timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
-        new_filename = f'{original_filename}_{timestamp}_{uid}'
+        original_filename = original_filename.split('.pptx')[0]
+        new_filename = f'{original_filename}_{timestamp}_{uid}.pptx'
         file.save(os.path.join(app.config['UPLOAD_FOLDER'], new_filename))
         return jsonify({'uid': uid})
     return jsonify({'error': 'No file uploaded.'})
@@ -65,7 +66,7 @@ def status(uid: str) -> jsonify:
         jsonify: A JSON response containing the status, original filename, timestamp,
         and explanation (if available) of the file.
     """
-    files = os.listdir('C:\\users\\yisra\\desktop\\outputs')
+    files = os.listdir('C:\\users\\yisra\\desktop\\uploads')
     matching_files = [file for file in files if uid in file]
     if len(matching_files) == 0:
         return jsonify({
@@ -73,9 +74,11 @@ def status(uid: str) -> jsonify:
             'filename': None,
             'timestamp': None,
             'explanation': None
-        }), 404
+        }), 200
 
-    file_path = os.path.join('../outputs', matching_files[0])
+    file_path = os.path.join('C:\\users\\yisra\\desktop\\outputs', matching_files[0])
+    file_path = file_path.split(".pptx")[0] + ".json"
+
     original_filename, timestamp, _ = get_file_details(matching_files[0])
 
     if os.path.isfile(file_path):
