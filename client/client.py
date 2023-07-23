@@ -1,5 +1,4 @@
 import requests
-from datetime import datetime
 
 
 def upload_file(base_url, file_path):

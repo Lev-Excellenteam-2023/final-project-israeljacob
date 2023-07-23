@@ -1,4 +1,3 @@
-import glob
 import os
 import uuid
 from datetime import datetime
@@ -74,7 +73,7 @@ def status(uid: str) -> jsonify:
             'filename': None,
             'timestamp': None,
             'explanation': None
-        }), 200
+        }), 404
 
     file_path = os.path.join('C:\\users\\yisra\\desktop\\outputs', matching_files[0])
     file_path = file_path.split(".pptx")[0] + ".json"
@@ -98,4 +97,4 @@ def status(uid: str) -> jsonify:
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host='127.0.0.1')
