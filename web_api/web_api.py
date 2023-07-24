@@ -2,14 +2,18 @@ import os
 import uuid
 from datetime import datetime
 import json
+from sqlalchemy import select
 
+from typing import Union
 from flask import Flask, request, jsonify
+from sqlalchemy.orm import Session
+import db.orm
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'C:\\users\\yisra\\desktop\\uploads'
 
 
-def get_file_details(filename: str)-> tuple:
+def get_file_details(filename: str) -> tuple:
     """
     Extracts details from a filename.
 
@@ -40,19 +44,35 @@ def upload() -> jsonify:
     """
 
     file = request.files['file']
+    email = request.form.get('email')
+
     if file:
         uid = str(uuid.uuid4())
-        original_filename = file.filename
-        timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
-        original_filename = original_filename.split('.pptx')[0]
-        new_filename = f'{original_filename}_{timestamp}_{uid}.pptx'
+        engine = db.orm.engine
+        with Session(engine) as session:
+            new_upload = db.orm.Upload(uid=uid, original_filename=file.filename.split('.pptx')[0],
+                      timestamp=datetime.now().strftime('%Y%m%d%H%M%S'), status='Pending')
+            session.add(new_upload)
+            session.commit()
+
+        new_filename = f'{uid}.pptx'
         file.save(os.path.join(app.config['UPLOAD_FOLDER'], new_filename))
+
+        if email:
+            user = get_user_by_email(email, session)
+            if not user:
+                user = db.orm.User(email = email)
+            user.uploads.append(new_upload)
+            new_upload.user = user
+            new_upload.user_id = user.id
+            session.add_all([user, new_upload])
+            session.commit()
         return jsonify({'uid': uid})
     return jsonify({'error': 'No file uploaded.'})
 
 
-@app.route('/status/<uid>', methods=['GET'])
-def status(uid: str) -> jsonify:
+@app.route('/status/<uid_filename_email>', methods=['GET'])
+def status(uid_filename_email: str) -> jsonify:
     """
     Retrieve file status and explanation.
 
@@ -65,8 +85,10 @@ def status(uid: str) -> jsonify:
         jsonify: A JSON response containing the status, original filename, timestamp,
         and explanation (if available) of the file.
     """
+    if uid_filename_email.__contains__('@'):
+        
     files = os.listdir('C:\\users\\yisra\\desktop\\uploads')
-    matching_files = [file for file in files if uid + ".pptx" == file.split("_")[2]]
+    matching_files = [file for file in files if uid_filename_email + ".pptx" == file.split("_")[2]]
     if len(matching_files) == 0:
         return jsonify({
             'status': 'not found',
@@ -94,6 +116,15 @@ def status(uid: str) -> jsonify:
         'timestamp': timestamp,
         'explanation': explanation
     }), 200
+
+
+def get_user_by_email(email, session: Session) -> Union[db.orm.User, None]:
+    select_statement = select(db.orm.User).where(db.orm.User.email == email)
+    result = session.scalars(select_statement).all()
+    if result:
+        return result[0]
+    else:
+        return None
 
 
 if __name__ == '__main__':
