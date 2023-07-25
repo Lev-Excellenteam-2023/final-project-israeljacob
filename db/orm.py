@@ -3,7 +3,7 @@ import uuid
 from datetime import datetime
 from sqlalchemy import create_engine, Column, Integer, String, DateTime, ForeignKey, Enum, event
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship, Mapped, mapped_column, Session
+from sqlalchemy.orm import relationship, Mapped, mapped_column, Session, DeclarativeBase
 from typing import List
 
 db_folder = "db"
@@ -14,12 +14,12 @@ engine = create_engine(f"sqlite:///{db_path}", echo=True)
 
 # Base = declarative_base(bind=engine)
 
-class Base():
+class Base(DeclarativeBase):
     pass
 
 
 class User(Base):
-    table_name = 'users'
+    __tablename__ = 'users'
 
     id: Mapped[int] = mapped_column(primary_key=True)
     email: Mapped[str] = mapped_column(unique=True, nullable=False)
@@ -31,13 +31,13 @@ class User(Base):
 
 
 class Upload(Base):
-    table_name = 'uploads'
+    __tablename__ = 'uploads'
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     uid: Mapped[str] = mapped_column(unique=True, nullable=False)
     filename: Mapped[str] = mapped_column(nullable=False)
-    upload_time: Mapped[DateTime] = mapped_column(nullable=False)
-    finish_time: Mapped[DateTime] = mapped_column(nullable=True)
+    upload_time: Mapped[datetime] = mapped_column(nullable=False)
+    finish_time: Mapped[datetime] = mapped_column(nullable=True)
     status: Mapped[str] = mapped_column(nullable=False)
 
     user_id: Mapped[int] = mapped_column(ForeignKey('users.id'))
