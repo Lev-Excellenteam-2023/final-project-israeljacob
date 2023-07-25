@@ -3,8 +3,7 @@ import uuid
 from datetime import datetime
 import json
 from sqlalchemy import select
-
-from typing import Union
+import sqlalchemy.sql.functions
 from flask import Flask, request, jsonify
 from sqlalchemy.orm import Session
 import db.orm
@@ -51,7 +50,7 @@ def upload() -> jsonify:
         engine = db.orm.engine
         with Session(engine) as session:
             new_upload = db.orm.Upload(uid=uid, original_filename=file.filename.split('.pptx')[0],
-                      timestamp=datetime.now().strftime('%Y%m%d%H%M%S'), status='Pending')
+                                       timestamp=datetime.now().strftime('%Y%m%d%H%M%S'), status='Pending')
             session.add(new_upload)
             session.commit()
 
@@ -61,7 +60,7 @@ def upload() -> jsonify:
         if email:
             user = get_user_by_email(email, session)
             if not user:
-                user = db.orm.User(email = email)
+                user = db.orm.User(email=email)
             user.uploads.append(new_upload)
             new_upload.user = user
             new_upload.user_id = user.id
@@ -79,52 +78,71 @@ def status(uid_filename_email: str) -> jsonify:
     This route retrieves the status and explanation of a file with the given UID.
 
     Args:
-        uid (str): The unique identifier (UID) of the file.
+        uid_filename_email (str): The unique identifier (UID) of the file.
 
     Returns:
         jsonify: A JSON response containing the status, original filename, timestamp,
         and explanation (if available) of the file.
     """
-    if uid_filename_email.__contains__('@'):
-        
-    files = os.listdir('C:\\users\\yisra\\desktop\\uploads')
-    matching_files = [file for file in files if uid_filename_email + ".pptx" == file.split("_")[2]]
-    if len(matching_files) == 0:
-        return jsonify({
-            'status': 'not found',
-            'filename': None,
-            'timestamp': None,
-            'explanation': None
-        }), 404
+    session = Session(db.orm.engine)
+    if not uid_filename_email.__contains__('@'):
+        requested_upload = get_upload_by_uid(uid_filename_email, session)
+        if not requested_upload:
+            return jsonify({
+                'status': 'not found',
+                'filename': None,
+                'timestamp': None,
+                'explanation': None
+            }), 404
 
-    file_path = os.path.join('C:\\users\\yisra\\desktop\\outputs', matching_files[0])
-    file_path = file_path.split(".pptx")[0] + ".json"
+    else:
+        filename, email = uid_filename_email.split(' ')
+        user = get_user_by_email(email, session)
+        if not user:
+            return jsonify({
+                'status': 'not found',
+                'filename': None,
+                'timestamp': None,
+                'explanation': None
+            }), 404
+        requested_upload = get_latest_upload_by_user(user)
 
-    original_filename, timestamp, _ = get_file_details(matching_files[0])
-
-    if os.path.isfile(file_path):
+    if requested_upload.status == 'done':
+        file_path = os.path.join('C:\\users\\yisra\\desktop\\outputs', requested_upload.filename)
+        file_path = file_path.split(".pptx")[0] + ".json"
         with open(file_path, 'r') as f:
             explanation = json.load(f)
-        status = 'done'
     else:
         explanation = None
-        status = 'pending'
 
     return jsonify({
-        'status': status,
-        'filename': original_filename,
-        'timestamp': timestamp,
+        'status': requested_upload.status,
+        'filename': requested_upload.original_filename,
+        'timestamp': requested_upload.timestamp,
         'explanation': explanation
     }), 200
 
 
-def get_user_by_email(email, session: Session) -> Union[db.orm.User, None]:
-    select_statement = select(db.orm.User).where(db.orm.User.email == email)
+def get_user_by_email(check_email, session: Session) -> db.orm.User:
+    select_statement = select(db.orm.User).where('email' == check_email)
     result = session.scalars(select_statement).all()
     if result:
         return result[0]
     else:
         return None
+
+
+def get_upload_by_uid(uid, session: Session) -> db.orm.Upload:
+    select_statement = select(db.orm.Upload).where('uid' == uid)
+    result = session.scalars(select_statement).all()
+    if result:
+        return result[0]
+    else:
+        return None
+
+
+def get_latest_upload_by_user(user) -> db.orm.Upload:
+    return max([uploads for uploads in user.uploads])
 
 
 if __name__ == '__main__':
