@@ -20,4 +20,3 @@ cursor.execute("""CREATE TABLE IF NOT EXISTS uploads (
     )""")
 
 connection.commit()
-connection.close()

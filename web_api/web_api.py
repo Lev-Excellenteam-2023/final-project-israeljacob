@@ -3,7 +3,6 @@ import uuid
 from datetime import datetime
 import json
 from sqlalchemy import select
-import sqlalchemy.sql.functions
 from flask import Flask, request, jsonify
 from sqlalchemy.orm import Session
 import db.orm
