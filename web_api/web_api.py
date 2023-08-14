@@ -5,6 +5,9 @@ import json
 
 from flask import Flask, request, jsonify
 
+NOT_FOUND = 404
+OK = 200
+
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'C:\\users\\yisra\\desktop\\uploads'
 
@@ -73,7 +76,7 @@ def status(uid: str) -> jsonify:
             'filename': None,
             'timestamp': None,
             'explanation': None
-        }), 404
+        }), NOT_FOUND
 
     file_path = os.path.join('C:\\users\\yisra\\desktop\\outputs', matching_files[0])
     file_path = file_path.split(".pptx")[0] + ".json"
@@ -93,7 +96,7 @@ def status(uid: str) -> jsonify:
         'filename': original_filename,
         'timestamp': timestamp,
         'explanation': explanation
-    }), 200
+    }), OK
 
 
 if __name__ == '__main__':
